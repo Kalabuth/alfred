@@ -12,7 +12,7 @@ class ServiceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Service
-        fields = ("id", "client_address", "driver", "status", "estimated_time_minutes")
+        fields = ("id", "client_address", "driver", "status", "estimated_time_minutes", "customer")
 
 
 class ServiceCreateSerializer(serializers.ModelSerializer):
@@ -34,6 +34,7 @@ class ServiceCreateSerializer(serializers.ModelSerializer):
 
         service = Service.objects.create(
             client_address=customer.current_location,
+            customer=customer,
             status=ServiceStatus.PENDING,
         )
 
