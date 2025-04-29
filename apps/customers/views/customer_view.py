@@ -12,7 +12,7 @@ from apps.customers.serializers.customers_serializer import (
     CustomerCreateSerializer,
     CustomerSerializer,
 )
-
+from apps.addresses.models.address import Address
 
 class CustomerView(ApiKeyProtectedViewMixin, viewsets.GenericViewSet):
     """
@@ -75,11 +75,21 @@ class CustomerView(ApiKeyProtectedViewMixin, viewsets.GenericViewSet):
     )
     def update(self, request, pk=None):
         customer = self.get_object()
+
+        address_uuid = request.data.get("address", None)
+        if address_uuid:
+            try:
+                address = Address.objects.get(id=address_uuid)
+                customer.current_location = address
+            except Address.DoesNotExist:
+                return Response(
+                    {"detail": "Address not found"}, status=status.HTTP_404_NOT_FOUND
+                )
+
         serializer = self.get_serializer(customer, data=request.data)
         serializer.is_valid(raise_exception=True)
         customer = serializer.save()
-        output = CustomerSerializer(customer)
-        return Response(output.data)
+        return Response(CustomerSerializer(customer).data)
 
     @swagger_auto_schema(
         operation_summary="Partial Update Customer",
@@ -88,11 +98,21 @@ class CustomerView(ApiKeyProtectedViewMixin, viewsets.GenericViewSet):
     )
     def partial_update(self, request, pk=None):
         customer = self.get_object()
+
+        address_uuid = request.data.get("address", None)
+        if address_uuid:
+            try:
+                address = Address.objects.get(id=address_uuid)
+                customer.address = address
+            except Address.DoesNotExist:
+                return Response(
+                    {"detail": "Address not found"}, status=status.HTTP_404_NOT_FOUND
+                )
+
         serializer = self.get_serializer(customer, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         customer = serializer.save()
-        output = CustomerSerializer(customer)
-        return Response(output.data)
+        return Response(CustomerSerializer(customer).data)
 
     @swagger_auto_schema(
         operation_summary="Delete Customer",
