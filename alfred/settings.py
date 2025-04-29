@@ -15,7 +15,6 @@ from pathlib import Path
 
 from decouple import Csv, config
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -237,7 +236,7 @@ AWS_S3_ADDRESSING_STYLE = config("AWS_S3_ADDRESSING_STYLE")
 ADMIN_URL = config("ADMIN_URL", default="admin")
 ADMIN_HONEYPOT_URL = config("ADMIN_HONEYPOT_URL", default="admin-honeypot")
 
-#User
+# User
 AUTH_USER_MODEL = "users.User"
 
 # Rest Framework
@@ -247,7 +246,6 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
         "rest_framework_api_key.permissions.HasAPIKey",
     ),
-    
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
