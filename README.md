@@ -1,52 +1,69 @@
+```markdown
+# 🏠 Backend de Servicios de Domicilio
 
-## Descripción  
+## 📋 Descripción
+
 Backend en Django 4.2 + DRF para un sistema de **Servicios de Domicilio**, que incluye:
 
-- 🔑 Autenticación vía API-Key (djangorestframework-api-key) y JWT (JSON Web Token) 
-- 📍 Gestión de **Direcciones**, **Conductores** y **Servicios**  
-- 🚗 Asignación automática del conductor más cercano  
-- 🐳 Docker & Docker Compose para despliegue local  
-- 📄 Documentación de la API con Swagger & ReDoc  
+- 🔑 Autenticación vía API-Key (djangorestframework-api-key) y JWT (JSON Web Token)
+- 📍 Gestión de **Direcciones**, **Conductores** y **Servicios**
+- 🚗 Asignación automática del conductor más cercano
+- 🐳 Docker & Docker Compose para despliegue local
+- 📄 Documentación de la API con Swagger & ReDoc
 
 ---
 
 ## 🚀 Características
 
-1. **Direcciones**  
-   - CRUD completo de direcciones: `street`, `latitude`, `longitude`.  
-   - Endpoints:  
-     - GET /addresses/  
-     - POST /addresses/  
-     - GET /addresses/{id}/  
-     - PUT /addresses/{id}/  
+1. **Direcciones**
+   - CRUD completo: `street`, `latitude`, `longitude`
+   - Endpoints:
+     - `GET /addresses/`
+     - `POST /addresses/`
+     - `GET /addresses/{id}/`
+     - `PUT /addresses/{id}/`
 
-2. **Conductores**  
-   - CRUD de conductores con nombre, ubicación (`Address`), disponibilidad y rating.  
-   - Action custom para actualizar disponibilidad.  
-   - Endpoints:  
-     - GET /drivers/  
-     - POST /drivers/  
-     - GET /drivers/{id}/  
-     - POST /drivers/{id}/update_availability/  
+2. **Conductores**
+   - CRUD de conductores: nombre, ubicación (`Address`), disponibilidad y rating
+   - Acción para actualizar disponibilidad
+   - Endpoints:
+     - `GET /drivers/`
+     - `POST /drivers/`
+     - `GET /drivers/{id}/`
+     - `POST /drivers/{id}/update_availability/`
 
-3. **Servicios**  
-   - Modelado de solicitudes de domicilio: `client_address`, `driver`, `status` (PENDING/ASSIGNED/COMPLETED), tiempos y marcas de fecha.  
-   - Asignación automática al conductor más cercano (fórmula de Haversine).  
-   - Endpoint para crear y asignar:  
-     - POST /services/  
-   - Action custom para completar servicio:  
-     - POST /services/{id}/complete/  
-   - Listar y recuperar:  
-     - GET /services/  
-     - GET //services/{id}/  
+3. **Servicios**
+   - Solicitud de servicios de domicilio: `client_address`, `driver`, `status` (PENDING/ASSIGNED/COMPLETED), timestamps
+   - Asignación automática al conductor más cercano usando fórmula de Haversine
+   - Endpoints:
+     - `POST /services/`
+     - `POST /services/{id}/complete/`
+     - `GET /services/`
+     - `GET /services/{id}/`
 
+4. **Autenticación y Seguridad**
+   - Autenticación JWT (`/auth/login/`, `/auth/register/`)
+   - Protección por **API-Key** en todas las vistas usando `ApiKeyProtectedViewMixin`
 
-4. **Autenticación & Seguridad**  
-   - Protección **API-Key** en todos los ViewSets mediante `ApiKeyProtectedViewMixin`.  
+5. **Documentación**
+   - Swagger UI → `/swagger/`
+   - ReDoc UI → `/redoc/`
 
-5. **Documentación de la API**  
-   - **Swagger UI** → `/swagger/`  
-   - **ReDoc UI**  → `/redoc/`  
+---
+
+## 🔐 Autenticación
+
+### Registro y Login
+
+- `POST /auth/register/` → Crea un nuevo usuario cliente o conductor
+- `POST /auth/login/` → Devuelve `access` y `refresh` tokens JWT válidos
+
+**Headers necesarios en endpoints protegidos**:
+
+```
+Authorization: Bearer <access_token>
+X-API-KEY: <tu_api_key>
+```
 
 ---
 
@@ -59,8 +76,8 @@ project_root/
 │   │   ├── models/address.py
 │   │   ├── serializers/address_serializer.py
 │   │   ├── views/address_view.py
-│   │   ├── services/             
-│   │   └── methods/              
+│   │   ├── services/
+│   │   └── methods/
 │   ├── drivers/
 │   │   ├── models/driver.py
 │   │   ├── serializers/driver_serializer.py
@@ -71,17 +88,14 @@ project_root/
 │   │   ├── models/service.py
 │   │   ├── serializers/service_serializer.py
 │   │   ├── views/service_view.py
-│   │   ├── services/             
-│   │   └── methods/              
+│   │   ├── services/
+│   │   └── methods/
 │   └── authentication/
 │       ├── serializers/
 │       ├── views/auth_view.py
 │       └── mixins/api_key_protected_view_mixin.py
-├── common/                       
+├── common/
 │   ├── utils/
-│   │   ├── date_utils.py
-│   │   ├── validators.py
-│   │   └── http_client.py
 │   ├── constants/
 │   ├── exceptions/
 │   └── mixins/
@@ -94,7 +108,7 @@ project_root/
 
 ## ⚙️ Configuración de Entorno
 
-Copia `env.example` → `.env` y define:
+`.env` y define tus valores:
 
 ```dotenv
 # Django
@@ -102,79 +116,100 @@ SECRET_KEY=…
 DEBUG=True
 ALLOWED_HOSTS=localhost
 
-
 # API-Key
 API_KEY_CUSTOM_HEADER=HTTP_X_API_KEY
+```
 
+> ⚠️ **Nota importante**: Este proyecto incluyo el archivo `.env` en el repositorio  **solo por ser una prueba técnica**.  
+> En un entorno real, **no debe subirse al repositorio**. Se recomienda almacenar esta información sensible en gestores como **1Password**, **Passbolt** o **Vault**.
 
+---
+
+## 🔐 Creación de API Key
+
+Puedes crear una API Key de dos maneras:
+
+### ✅ Opción 1: Desde el panel de administración
+
+1. Ir a: `http://localhost:8000/admin/`
+2. Acceder a `API Key > API Keys`
+3. Crear una nueva clave y **copiar el valor completo**, ya que no se puede volver a ver.
+
+### 🐚 Opción 2: Desde la terminal
+
+```bash
+python manage.py shell
+```
+
+```python
+from rest_framework_api_key.models import APIKey
+api_key, key = APIKey.objects.create_key(name="client")
+print("API Key:", key)
 ```
 
 ---
 
 ## 🛠️ Instalación Local
 
-1. **Clonar repo**  
-   ```bash
-   git clone <repo_url>
-   cd project
-   ```
+1. Clonar el repositorio:
 
-2. **Instalar dependencias**  
-   ```bash
-   -pip install poetry
-   -poetry install
-   ```
+```bash
+git clone <repo_url>
+cd project
+```
 
-3. **Migraciones**  
-   ```bash
-   python manage.py migrate
-   ```
+2. Instalar dependencias:
 
-4. **Crear superusuario**  
-   ```bash
-   python manage.py createsuperuser
-   ```
+```bash
+pip install poetry
+poetry install
+```
 
-5. **Crear API Key**  
-   ```bash
-   python manage.py shell
-   >>> from rest_framework_api_key.models import APIKey
-   >>> _, key = APIKey.objects.create_key(name="client")
-   >>> print(key)
-   ```
+3. Aplicar migraciones:
 
-6. **Correr servidor**  
-   ```bash
-   python manage.py runserver
-   ```
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+También puedes simplemente correr el proyecto con Docker, que se encarga automáticamente de todo.
+
+4. Crear superusuario:
+
+```bash
+python manage.py createsuperuser
+```
+
+5. Crear una API Key (ver sección anterior)
+
+6. Ejecutar servidor:
+
+```bash
+python manage.py runserver
+```
 
 ---
 
-## 🐳 Con Docker
+## 🐳 Uso con Docker
+
+### Build y ejecución
 
 ```bash
 docker compose build
 docker compose up -d
 ```
 
-- **web**: Django + Gunicorn (0.0.0.0:8000)  
-- **db**: PostgreSQL  
 
----
+### Ejecutar pruebas en el contenedor web
 
-## 📑 Documentación de la API
+```bash
+docker compose exec web python manage.py test
+```
 
-- **Swagger UI** → `http://localhost:8000/swagger/`  
-- **ReDoc UI**  → `http://localhost:8000/redoc/`  
-
----
-
-## 🔒 Seguridad
-
-- **API-Key** en todas las vistas.  
 ---
 
 ## 🔍 Pruebas
+
+Ejecutar los tests unitarios localmente:
 
 ```bash
 python manage.py test
@@ -182,16 +217,26 @@ python manage.py test
 
 ---
 
-## 🖊️ Calidad de Código
+## 📑 Documentación de la API
 
-- **Black**  
-  ```bash
-  black . 
-  ```
-
-- **Ruff**  
-  ```bash
-  ruff . 
-  ```
+- Swagger → [http://localhost:8000/swagger/](http://localhost:8000/swagger/)
+- ReDoc → [http://localhost:8000/redoc/](http://localhost:8000/redoc/)
 
 ---
+
+## 🖊️ Calidad de Código
+
+- **Black** (formateo):
+
+```bash
+black .
+```
+
+- **Ruff** (linting):
+
+```bash
+ruff .
+```
+
+---
+```
